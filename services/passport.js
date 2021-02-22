@@ -13,11 +13,9 @@ passport.serializeUser((user, done) => {
 });
 
 // userId is the exact data stuffed into a cookie in serializeUser()
-passport.deserializeUser((userId, done) => {
-    User.findById(userId)
-        .then(user => {
-            done(null, user);
-        });
+passport.deserializeUser(async (userId, done) => {
+    const user = await User.findById(userId);
+    done(null, user);
 });
 
 passport.use(
@@ -27,19 +25,16 @@ passport.use(
         callbackURL: '/auth/google/callback',
         proxy: true
     },
-    (accessToken, refreshToken, profile, done) => {
-        User.findOne({ googleId: profile.id })
-            .then((existingUser) => {
-                if (existingUser) {
-                    // We already have a record of this user, do nothing
-                    console.log('User already exists. Cool.');
-                    done(null, existingUser);
-                }
-                else {
-                    new User({ googleId: profile.id })
-                        .save()
-                        .then(user => done(null, user));
-                }
-            });
+    async (accessToken, refreshToken, profile, done) => {
+        const existingUser = await User.findOne({ googleId: profile.id });
+        
+        if (existingUser) {
+            // We already have a record of this user, do nothing
+            console.log('User already exists. Cool.');
+            done(null, existingUser);
+        }
+
+        const user = await new User({ googleId: profile.id }).save();
+        done(null, user);
     }
 ));
