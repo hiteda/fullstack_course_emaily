@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose; // {} syntax gets property of mongoose with the same name
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
     googleId: String,
